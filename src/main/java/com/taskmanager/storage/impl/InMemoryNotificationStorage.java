@@ -1,31 +1,36 @@
 package com.taskmanager.storage.impl;
 
+import com.taskmanager.entity.NotificationEntity;
 import com.taskmanager.storage.NotificationStorage;
-import com.taskmanager.model.Notification;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Component
+@Profile("test")
 public class InMemoryNotificationStorage implements NotificationStorage {
-    private final Map<String, Notification> notifications = new ConcurrentHashMap<>();
+    private final Map<UUID, NotificationEntity> notifications = new ConcurrentHashMap<>();
     
     @Override
-    public Notification save(Notification notification) {
-        notifications.put(notification.getId(), notification);
+    public NotificationEntity save(NotificationEntity notification) {
+        UUID id = notification.getId() != null ? notification.getId() : UUID.randomUUID();
+        notification.setId(id);
+        notifications.put(id, notification);
         return notification;
     }
     
     @Override
-    public List<Notification> findByUserId(String userId) {
+    public List<NotificationEntity> findByUserId(UUID userId) {
         return notifications.values().stream()
             .filter(notification -> notification.getUserId().equals(userId))
             .collect(Collectors.toList());
     }
     
     @Override
-    public List<Notification> findPendingByUserId(String userId) {
+    public List<NotificationEntity> findPendingByUserId(UUID userId) {
         return notifications.values().stream()
             .filter(notification -> notification.getUserId().equals(userId) && !notification.isRead())
             .collect(Collectors.toList());

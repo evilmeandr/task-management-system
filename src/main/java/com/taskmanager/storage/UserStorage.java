@@ -1,10 +1,11 @@
 package com.taskmanager.storage;
 
-import com.taskmanager.model.User;
+import com.taskmanager.entity.UserEntity;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface UserStorage {
-    User save(User user);
-    Optional<User> findById(String id);
-    Optional<User> findByUsername(String username);
+    UserEntity save(UserEntity user);
+    Optional<UserEntity> findById(UUID id);
+    Optional<UserEntity> findByUsername(String username);
 }

@@ -1,5 +1,7 @@
 package com.taskmanager.service.impl;
 
+import com.taskmanager.config.EntityMapper;
+import com.taskmanager.entity.UserEntity;
 import com.taskmanager.service.UserService;
 import com.taskmanager.storage.UserStorage;
 import com.taskmanager.dto.UserRegistrationDto;
@@ -19,13 +21,18 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Username already exists");
         }
         
-        User user = User.create(dto.getUsername(), dto.getEmail());
-        return userStorage.save(user);
+        UserEntity entity = UserEntity.builder()
+            .username(dto.getUsername())
+            .email(dto.getEmail())
+            .build();
+        UserEntity saved = userStorage.save(entity);
+        return EntityMapper.toModel(saved);
     }
     
     @Override
     public User login(String username) {
-        return userStorage.findByUsername(username)
+        UserEntity found = userStorage.findByUsername(username)
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return EntityMapper.toModel(found);
     }
 }
