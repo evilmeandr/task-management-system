@@ -2,6 +2,7 @@ package com.taskmanager.service.impl;
 
 import com.taskmanager.dto.UserRegistrationDto;
 import com.taskmanager.model.User;
+import com.taskmanager.entity.UserEntity;
 import com.taskmanager.storage.UserStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,23 +35,24 @@ class UserServiceImplTest {
         dto = new UserRegistrationDto();
         dto.setUsername("testuser");
         dto.setEmail("test@example.com");
-        testUser = User.create("testuser", "test@example.com");
+        testUser = User.builder().username("testuser").email("test@example.com").build();
     }
 
     @Test
     void register_shouldSaveNewUser() {
         when(userStorage.findByUsername(dto.getUsername())).thenReturn(Optional.empty());
-        when(userStorage.save(any(User.class))).thenReturn(testUser);
+        when(userStorage.save(any(UserEntity.class))).thenAnswer(inv -> (UserEntity) inv.getArgument(0));
 
         User registered = userService.register(dto);
 
-        assertThat(registered).isEqualTo(testUser);
-        verify(userStorage).save(any(User.class));
+        assertThat(registered.getUsername()).isEqualTo(testUser.getUsername());
+        assertThat(registered.getEmail()).isEqualTo(testUser.getEmail());
+        verify(userStorage).save(any(UserEntity.class));
     }
 
     @Test
     void register_shouldThrowOnDuplicateUsername() {
-        when(userStorage.findByUsername(dto.getUsername())).thenReturn(Optional.of(testUser));
+        when(userStorage.findByUsername(dto.getUsername())).thenReturn(Optional.of(UserEntity.builder().username("testuser").email("test@example.com").build()));
 
         assertThatThrownBy(() -> userService.register(dto))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -59,11 +61,12 @@ class UserServiceImplTest {
 
     @Test
     void login_shouldReturnUser() {
-        when(userStorage.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+        when(userStorage.findByUsername("testuser")).thenReturn(Optional.of(UserEntity.builder().username("testuser").email("test@example.com").build()));
 
         User loggedIn = userService.login("testuser");
 
-        assertThat(loggedIn).isEqualTo(testUser);
+        assertThat(loggedIn.getUsername()).isEqualTo(testUser.getUsername());
+        assertThat(loggedIn.getEmail()).isEqualTo(testUser.getEmail());
     }
 
     @Test

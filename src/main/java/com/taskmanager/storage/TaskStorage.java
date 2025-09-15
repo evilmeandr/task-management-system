@@ -1,11 +1,12 @@
 package com.taskmanager.storage;
 
-import com.taskmanager.model.Task;
+import com.taskmanager.entity.TaskEntity;
 import java.util.List;
+import java.util.UUID;
 
 public interface TaskStorage {
-    Task save(Task task);
-    List<Task> findByUserId(String userId);
-    List<Task> findPendingByUserId(String userId);
-    void markAsDeleted(String taskId);
+    TaskEntity save(TaskEntity task);
+    List<TaskEntity> findByUserId(UUID userId);
+    List<TaskEntity> findPendingByUserId(UUID userId);
+    void markAsDeleted(UUID taskId);
 }

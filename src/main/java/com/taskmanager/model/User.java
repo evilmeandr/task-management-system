@@ -12,13 +12,4 @@ public class User {
     private String username;
     private String email;
     private LocalDateTime createdAt;
-    
-    public static User create(String username, String email) {
-        return User.builder()
-            .id(UUID.randomUUID().toString())
-            .username(username)
-            .email(email)
-            .createdAt(LocalDateTime.now())
-            .build();
-    }
 }

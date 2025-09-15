@@ -1,10 +1,11 @@
 package com.taskmanager.storage;
 
-import com.taskmanager.model.Notification;
+import com.taskmanager.entity.NotificationEntity;
 import java.util.List;
+import java.util.UUID;
 
 public interface NotificationStorage {
-    Notification save(Notification notification);
-    List<Notification> findByUserId(String userId);
-    List<Notification> findPendingByUserId(String userId);
+    NotificationEntity save(NotificationEntity notification);
+    List<NotificationEntity> findByUserId(UUID userId);
+    List<NotificationEntity> findPendingByUserId(UUID userId);
 }
