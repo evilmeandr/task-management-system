@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Component
-@Profile("dev")
+@Profile({"dev","postgres"})
 @RequiredArgsConstructor
 public class JpaUserStorage implements UserStorage {
     private final UserRepository userRepository;

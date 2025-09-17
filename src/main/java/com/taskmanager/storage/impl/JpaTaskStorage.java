@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-@Profile("dev")
+@Profile({"dev","postgres"})
 @RequiredArgsConstructor
 public class JpaTaskStorage implements TaskStorage {
     private final TaskRepository taskRepository;
