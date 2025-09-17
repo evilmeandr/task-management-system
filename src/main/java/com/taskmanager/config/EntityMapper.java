@@ -80,7 +80,7 @@ public final class EntityMapper {
             .message(model.getMessage())
             .type(model.getType())
             .read(model.isRead())
-            .createdAt(model.getCreatedAt())
+            .createdAt(model.getCreatedAt() != null ? model.getCreatedAt() : java.time.LocalDateTime.now())
             .build();
     }
 }
