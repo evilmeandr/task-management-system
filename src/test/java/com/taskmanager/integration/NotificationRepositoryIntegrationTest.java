@@ -25,7 +25,6 @@ class NotificationRepositoryIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void shouldFindAllAndPending() {
-        // Ensure FK user exists
         UserEntity user = userRepository.save(UserEntity.builder()
                 .username("notif_user")
                 .email("notif_user@example.com")
