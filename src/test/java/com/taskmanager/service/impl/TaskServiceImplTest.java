@@ -7,6 +7,8 @@ import com.taskmanager.model.Task;
 import com.taskmanager.service.NotificationService;
 import com.taskmanager.service.cache.CacheService;
 import com.taskmanager.service.cache.CacheKeyGenerator;
+import com.taskmanager.service.messaging.MessageProducer;
+import com.taskmanager.service.messaging.TaskCreatedEvent;
 import com.taskmanager.storage.TaskStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +39,9 @@ class TaskServiceImplTest {
     @Mock
     private CacheKeyGenerator cacheKeyGenerator;
 
+    @Mock
+    private MessageProducer messageProducer;
+
     @InjectMocks
     private TaskServiceImpl taskService;
 
@@ -54,17 +59,20 @@ class TaskServiceImplTest {
     }
 
     @Test
-    void createTask_shouldSaveTaskAndCreateNotification() {
+    void createTask_shouldSaveTaskAndSendEvent() {
         when(taskStorage.save(any(TaskEntity.class))).thenAnswer(inv -> (TaskEntity) inv.getArgument(0));
-        Notification mockNotification = Notification.builder().id("00000000-0000-0000-0000-000000000000").build();
-        when(notificationService.createNotification(any(Notification.class))).thenReturn(mockNotification);
+        when(cacheKeyGenerator.generateTasksByUserKey(userId)).thenReturn("tasks:user:" + userId);
+        when(cacheKeyGenerator.generatePendingTasksByUserKey(userId)).thenReturn("pending:tasks:user:" + userId);
 
         Task created = taskService.createTask(userId, dto);
 
         assertThat(created.getTitle()).isEqualTo("Test Task");
         assertThat(created.getUserId()).isEqualTo(userId);
         verify(taskStorage).save(any(TaskEntity.class));
-        verify(notificationService).createNotification(any(Notification.class));
+        verify(messageProducer).sendTaskCreatedEvent(any(TaskCreatedEvent.class));
+        verify(cacheService).evict("tasks:user:" + userId);
+        verify(cacheService).evict("pending:tasks:user:" + userId);
+        verify(notificationService, never()).createNotification(any());
     }
 
     @Test
