@@ -8,6 +8,7 @@ import com.taskmanager.storage.NotificationStorage;
 import com.taskmanager.model.Notification;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
     
     @Override
+    @Async("taskExecutor")
     @CachePut(value = "notifications", key = "#result.id")
     public Notification createNotification(Notification notification) {
         log.debug("Creating notification for user: {}", notification.getUserId());

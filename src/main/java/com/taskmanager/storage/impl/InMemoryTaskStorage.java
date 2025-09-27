@@ -52,4 +52,11 @@ public class InMemoryTaskStorage implements TaskStorage {
             tasks.put(taskId, task);
         }
     }
+
+    @Override
+    public List<TaskEntity> findAllPendingTasks() {
+        return tasks.values().stream()
+            .filter(task -> !task.isDeleted() && task.getStatus() == TaskStatus.PENDING)
+            .collect(Collectors.toList());
+    }
 }

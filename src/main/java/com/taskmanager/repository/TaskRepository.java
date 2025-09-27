@@ -20,6 +20,8 @@ public interface TaskRepository extends JpaRepository<TaskEntity, UUID> {
     @Modifying
     @Query("UPDATE TaskEntity t SET t.deleted = true WHERE t.id = :id")
     void markAsDeleted(@Param("id") UUID id);
+
+    List<TaskEntity> findByStatusAndDeletedFalse(TaskStatus status);
 }
 
 

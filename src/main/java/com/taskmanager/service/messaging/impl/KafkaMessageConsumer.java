@@ -2,6 +2,7 @@ package com.taskmanager.service.messaging.impl;
 
 import com.taskmanager.service.messaging.MessageConsumer;
 import com.taskmanager.service.messaging.TaskCreatedEvent;
+import com.taskmanager.service.messaging.TaskOverdueEvent;
 import com.taskmanager.service.NotificationService;
 import com.taskmanager.model.Notification;
 import com.taskmanager.model.NotificationType;
@@ -43,6 +44,32 @@ public class KafkaMessageConsumer implements MessageConsumer {
     
     @Override
     public void consumeTaskCreatedEvent(TaskCreatedEvent event) {
+        consume(event);
+    }
+    
+    @KafkaListener(topics = "task-overdue-events", groupId = "task-manager-group")
+    public void consume(TaskOverdueEvent event) {
+        try {
+            log.debug("Received task overdue event: {}", event);
+            
+            Notification notification = Notification.builder()
+                .id(java.util.UUID.randomUUID().toString())
+                .userId(event.getUserId())
+                .message("Task overdue: " + event.getTaskTitle())
+                .type(NotificationType.TASK_OVERDUE)
+                .read(false)
+                .createdAt(java.time.LocalDateTime.now())
+                .build();
+            
+            notificationService.createNotification(notification);
+            log.debug("Created overdue notification for user: {}", event.getUserId());
+        } catch (Exception e) {
+            log.error("Failed to process task overdue event: {}", event, e);
+        }
+    }
+    
+    @Override
+    public void consumeTaskOverdueEvent(TaskOverdueEvent event) {
         consume(event);
     }
 }
