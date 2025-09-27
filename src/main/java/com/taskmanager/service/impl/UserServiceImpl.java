@@ -8,6 +8,8 @@ import com.taskmanager.dto.UserRegistrationDto;
 import com.taskmanager.model.User;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -15,8 +17,15 @@ public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
     
     @Override
+    public List<User> getAllUsers() {
+        List<UserEntity> entities = userStorage.findAll();
+        return entities.stream()
+            .map(EntityMapper::toModel)
+            .collect(Collectors.toList());
+    }
+    
+    @Override
     public User register(UserRegistrationDto dto) {
-        // Проверяем, существует ли пользователь
         if (userStorage.findByUsername(dto.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already exists");
         }

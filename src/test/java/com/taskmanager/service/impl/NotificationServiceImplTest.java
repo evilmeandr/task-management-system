@@ -3,6 +3,8 @@ package com.taskmanager.service.impl;
 import com.taskmanager.model.Notification;
 import com.taskmanager.model.NotificationType;
 import com.taskmanager.entity.NotificationEntity;
+import com.taskmanager.service.cache.CacheService;
+import com.taskmanager.service.cache.CacheKeyGenerator;
 import com.taskmanager.storage.NotificationStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,12 @@ class NotificationServiceImplTest {
 
     @Mock
     private NotificationStorage notificationStorage;
+
+    @Mock
+    private CacheService cacheService;
+
+    @Mock
+    private CacheKeyGenerator cacheKeyGenerator;
 
     @InjectMocks
     private NotificationServiceImpl notificationService;
@@ -57,6 +65,8 @@ class NotificationServiceImplTest {
     @Test
     void createNotification_shouldSaveAndReturn() {
         when(notificationStorage.save(any(NotificationEntity.class))).thenReturn(NotificationEntity.builder().message("Test msg").build());
+        when(cacheKeyGenerator.generateNotificationsByUserKey(userId)).thenReturn("notifications:user:" + userId);
+        when(cacheKeyGenerator.generatePendingNotificationsByUserKey(userId)).thenReturn("pending:notifications:user:" + userId);
 
         Notification created = notificationService.createNotification(testNotif);
 

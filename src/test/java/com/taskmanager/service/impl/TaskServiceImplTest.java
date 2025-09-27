@@ -5,6 +5,8 @@ import com.taskmanager.model.Notification;
 import com.taskmanager.entity.TaskEntity;
 import com.taskmanager.model.Task;
 import com.taskmanager.service.NotificationService;
+import com.taskmanager.service.cache.CacheService;
+import com.taskmanager.service.cache.CacheKeyGenerator;
 import com.taskmanager.storage.TaskStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,12 @@ class TaskServiceImplTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private CacheService cacheService;
+
+    @Mock
+    private CacheKeyGenerator cacheKeyGenerator;
 
     @InjectMocks
     private TaskServiceImpl taskService;
@@ -82,9 +90,21 @@ class TaskServiceImplTest {
     @Test
     void deleteTask_shouldMarkAsDeleted() {
         String taskId = "00000000-0000-0000-0000-000000000000";
+        TaskEntity taskEntity = TaskEntity.builder()
+            .id(java.util.UUID.fromString(taskId))
+            .userId(java.util.UUID.fromString(userId))
+            .title("Test Task")
+            .build();
+        
+        when(taskStorage.findById(java.util.UUID.fromString(taskId))).thenReturn(java.util.Optional.of(taskEntity));
+        when(cacheKeyGenerator.generateTasksByUserKey(userId)).thenReturn("tasks:user:" + userId);
+        when(cacheKeyGenerator.generatePendingTasksByUserKey(userId)).thenReturn("pending:tasks:user:" + userId);
 
         taskService.deleteTask(taskId);
 
+        verify(taskStorage).findById(java.util.UUID.fromString(taskId));
         verify(taskStorage).markAsDeleted(any(java.util.UUID.class));
+        verify(cacheService).evict("tasks:user:" + userId);
+        verify(cacheService).evict("pending:tasks:user:" + userId);
     }
 }

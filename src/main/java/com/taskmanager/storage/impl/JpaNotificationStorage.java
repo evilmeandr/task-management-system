@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-@Profile({"dev","postgres"})
+@Profile({"dev","postgres","redis"})
 @RequiredArgsConstructor
 public class JpaNotificationStorage implements NotificationStorage {
     private final NotificationRepository notificationRepository;

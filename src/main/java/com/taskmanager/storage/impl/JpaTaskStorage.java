@@ -9,10 +9,11 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
-@Profile({"dev","postgres"})
+@Profile({"dev","postgres","redis"})
 @RequiredArgsConstructor
 public class JpaTaskStorage implements TaskStorage {
     private final TaskRepository taskRepository;
@@ -20,6 +21,11 @@ public class JpaTaskStorage implements TaskStorage {
     @Override
     public TaskEntity save(TaskEntity task) {
         return taskRepository.save(task);
+    }
+
+    @Override
+    public Optional<TaskEntity> findById(UUID taskId) {
+        return taskRepository.findById(taskId);
     }
 
     @Override
