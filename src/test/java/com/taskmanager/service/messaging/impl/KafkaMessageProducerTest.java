@@ -35,23 +35,20 @@ class KafkaMessageProducerTest {
 
     @Test
     void sendTaskCreatedEvent_shouldSendToKafka() {
-        // When
         messageProducer.sendTaskCreatedEvent(testEvent);
 
-        // Then
         verify(kafkaTemplate).send(eq("task-created-events"), eq(testEvent));
     }
 
     @Test
     void sendTaskCreatedEvent_shouldHandleException() {
-        // Given
         doThrow(new RuntimeException("Kafka error")).when(kafkaTemplate).send(any(), any());
 
-        // When & Then - should not throw exception (graceful degradation)
         messageProducer.sendTaskCreatedEvent(testEvent);
 
         verify(kafkaTemplate).send(eq("task-created-events"), eq(testEvent));
     }
 }
+
 
 

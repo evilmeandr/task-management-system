@@ -36,19 +36,15 @@ class KafkaMessageConsumerTest {
 
     @Test
     void consume_shouldCreateNotification() {
-        // When
         messageConsumer.consume(testEvent);
 
-        // Then
         verify(notificationService).createNotification(any(Notification.class));
     }
 
     @Test
     void consume_shouldHandleException() {
-        // Given
         doThrow(new RuntimeException("Database error")).when(notificationService).createNotification(any());
 
-        // When & Then - should not throw exception (graceful degradation)
         messageConsumer.consume(testEvent);
 
         verify(notificationService).createNotification(any(Notification.class));
@@ -56,12 +52,12 @@ class KafkaMessageConsumerTest {
 
     @Test
     void consumeTaskCreatedEvent_shouldCallConsume() {
-        // When
         messageConsumer.consumeTaskCreatedEvent(testEvent);
 
-        // Then
         verify(notificationService).createNotification(any(Notification.class));
     }
 }
+
+
 
 
