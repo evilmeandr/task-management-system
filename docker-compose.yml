@@ -1,24 +1,49 @@
-services:
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: taskmanager
-      POSTGRES_USER: taskmanager
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+version: '3.8'
 
+services:
   app:
     build: .
     ports:
       - "8080:8080"
-    depends_on:
-      - postgres
     environment:
-      - SPRING_PROFILES_ACTIVE=postgres
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/taskmanager
+      - SPRING_PROFILES_ACTIVE=redis
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/taskdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_DATABASE=0
+      - SPRING_DATA_REDIS_TIMEOUT=2000ms
+      - SPRING_DATA_REDIS_LETTUCE_POOL_MAX_ACTIVE=8
+      - SPRING_DATA_REDIS_LETTUCE_POOL_MAX_IDLE=8
+      - SPRING_DATA_REDIS_LETTUCE_POOL_MIN_IDLE=0
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=taskdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis-data:/data
 
 volumes:
-  postgres_data:
+  postgres-data: 
+  redis-data:

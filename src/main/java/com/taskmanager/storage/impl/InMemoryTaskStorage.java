@@ -24,6 +24,11 @@ public class InMemoryTaskStorage implements TaskStorage {
     }
     
     @Override
+    public Optional<TaskEntity> findById(UUID taskId) {
+        return Optional.ofNullable(tasks.get(taskId));
+    }
+    
+    @Override
     public List<TaskEntity> findByUserId(UUID userId) {
         return tasks.values().stream()
             .filter(task -> task.getUserId().equals(userId) && !task.isDeleted())

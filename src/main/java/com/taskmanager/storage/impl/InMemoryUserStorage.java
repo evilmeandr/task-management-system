@@ -32,4 +32,9 @@ public class InMemoryUserStorage implements UserStorage {
     public Optional<UserEntity> findByUsername(String username) {
         return Optional.ofNullable(usersByUsername.get(username));
     }
+
+    @Override
+    public List<UserEntity> findAll() {
+        return new ArrayList<>(users.values());
+    }
 }
