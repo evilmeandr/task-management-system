@@ -3,12 +3,11 @@ package com.taskmanager.service.impl;
 import com.taskmanager.config.EntityMapper;
 import com.taskmanager.entity.TaskEntity;
 import com.taskmanager.model.Task;
-import com.taskmanager.model.Notification;
-import com.taskmanager.model.NotificationType;
 import com.taskmanager.service.TaskService;
-import com.taskmanager.service.NotificationService;
 import com.taskmanager.service.cache.CacheService;
 import com.taskmanager.service.cache.CacheKeyGenerator;
+import com.taskmanager.service.messaging.MessageProducer;
+import com.taskmanager.service.messaging.TaskCreatedEvent;
 import com.taskmanager.storage.TaskStorage;
 import com.taskmanager.dto.TaskCreateDto;
 import org.springframework.cache.annotation.CacheEvict;
@@ -25,7 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
     private final TaskStorage taskStorage;
-    private final NotificationService notificationService;
+    private final MessageProducer messageProducer;
     private final CacheService cacheService;
     private final CacheKeyGenerator cacheKeyGenerator;
     
@@ -47,12 +46,13 @@ public class TaskServiceImpl implements TaskService {
         cacheService.evict(tasksByUserKey);
         cacheService.evict(pendingTasksKey);
         
-        Notification notification = Notification.builder()
+        // Send task created event to Kafka
+        TaskCreatedEvent event = TaskCreatedEvent.builder()
             .userId(userId)
-            .message("New task created: " + entity.getTitle())
-            .type(NotificationType.TASK_CREATED)
+            .taskTitle(entity.getTitle())
+            .taskDescription(entity.getDescription())
             .build();
-        notificationService.createNotification(notification);
+        messageProducer.sendTaskCreatedEvent(event);
         
         Task result = EntityMapper.toModel(savedTask);
         log.debug("Task created successfully with ID: {}", result.getId());

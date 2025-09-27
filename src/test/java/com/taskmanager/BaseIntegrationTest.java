@@ -9,8 +9,11 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.context.annotation.Import;
+import com.taskmanager.config.TestConfig;
 
 @SpringBootTest
 @Testcontainers
@@ -20,6 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "spring.datasource.hikari.maxLifetime=60000",
         "spring.datasource.hikari.connectionTimeout=30000"
 })
+@Import(TestConfig.class)
 public abstract class BaseIntegrationTest {
 
     @Container
@@ -31,6 +35,10 @@ public abstract class BaseIntegrationTest {
     @Container
     static GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
             .withExposedPorts(6379);
+
+    @Container
+    static KafkaContainer kafka = new KafkaContainer(
+            org.testcontainers.utility.DockerImageName.parse("confluentinc/cp-kafka:7.0.1"));
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -45,6 +53,8 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.redis.host", redis::getHost);
         registry.add("spring.redis.port", () -> redis.getMappedPort(6379));
         registry.add("spring.cache.type", () -> "redis");
+        
+        registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
     }
 }
 
