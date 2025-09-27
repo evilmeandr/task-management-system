@@ -10,5 +10,6 @@ public interface TaskStorage {
     Optional<TaskEntity> findById(UUID taskId);
     List<TaskEntity> findByUserId(UUID userId);
     List<TaskEntity> findPendingByUserId(UUID userId);
+    List<TaskEntity> findAllPendingTasks();
     void markAsDeleted(UUID taskId);
 }

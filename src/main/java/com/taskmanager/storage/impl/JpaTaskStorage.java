@@ -43,6 +43,11 @@ public class JpaTaskStorage implements TaskStorage {
     public void markAsDeleted(UUID taskId) {
         taskRepository.markAsDeleted(taskId);
     }
+
+    @Override
+    public List<TaskEntity> findAllPendingTasks() {
+        return taskRepository.findByStatusAndDeletedFalse(TaskStatus.PENDING);
+    }
 }
 
 

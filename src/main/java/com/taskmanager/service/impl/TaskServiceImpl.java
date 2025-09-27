@@ -13,6 +13,7 @@ import com.taskmanager.dto.TaskCreateDto;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,6 @@ public class TaskServiceImpl implements TaskService {
         cacheService.evict(tasksByUserKey);
         cacheService.evict(pendingTasksKey);
         
-        // Send task created event to Kafka
         TaskCreatedEvent event = TaskCreatedEvent.builder()
             .userId(userId)
             .taskTitle(entity.getTitle())
@@ -103,5 +103,12 @@ public class TaskServiceImpl implements TaskService {
         cacheService.evict(pendingTasksKey);
         
         log.debug("Task {} deleted successfully", taskId);
+    }
+    
+    @Async("taskExecutor")
+    public void evictCacheAsync(String... keys) {
+        for (String key : keys) {
+            cacheService.evict(key);
+        }
     }
 }
